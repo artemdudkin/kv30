@@ -32,8 +32,8 @@ function setProps(opt) { // {
   }
 }
 
-
-//from https://stackoverflow.com/a/77486780/4486609
+// Get random string of length N
+// (from https://stackoverflow.com/a/77486780/4486609)
 function _rnd(n) {
   return Array.from({ length: n }, i => String.fromCharCode(Math.round(Math.ceil(Math.random() * 25) + 65))).join('');
 }
@@ -64,10 +64,11 @@ function load(name) {
     return JSON.parse(fs.readFileSync(fn).toString());
 }
 
+
 // @returns Promise
 function save(name, data) {
   if (READONLY) {
-    return Promise.reject('cannot save to readonly connect');
+    return Promise.reject('cannot save to readonly connection');
   } else {
     return new Promise((resolve, reject) => {
       let fn = path.join(DATA_FOLDER, name+'.json');

@@ -25,12 +25,14 @@ let saving = {}; // {name:<boolean>, ...} // object of this name is in the savin
 
 
 function get(name, defaultValue) {
+  name = '' + name
   if (!o[name]) _load(name, defaultValue);
   return _getWatchedObject(name)
 }
 
 
 function getRO(name, defaultValue) {
+  name = '' + name
   if (!o[name]) {
     _load(name, defaultValue);
     o[name].readonly = true;
@@ -40,6 +42,7 @@ function getRO(name, defaultValue) {
 
 
 function getStatus(name) {
+  name = '' + name
   if (!o[name]) {
     return {
       initError:true
@@ -55,6 +58,7 @@ function getStatus(name) {
 
 
 function set(name, data) {
+  name = '' + name
   o[name] = {
     data,
     changed: true
@@ -133,7 +137,6 @@ function _load(name, defaultValue) {
   let loadError;
   let changed = false;
 
-  name = ''+name;
   try {
     let s = Date.now();
     data = STORAGE.load(name);
