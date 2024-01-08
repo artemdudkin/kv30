@@ -1,7 +1,7 @@
 /**
  * Loads and converts to json by get(); from files by default
  * Watch changes and saves every N seconds if it was changed
- * Readonly options can be used (getRO, storageFile.setProps)
+ * Readonly options can be used (see get(...,{readonly:true}), init({readonly:true}))
  */
 
 const fs = require('fs');
@@ -11,6 +11,7 @@ const deepFreeze = require('./util.deepFreeze');
 
 let SAVE_PERIOD = 30; // flush data every 30 seconds
 let STORAGE = storageFile; // save data to files
+let READONLY_TOTAL = false; // all data at storage is readonly
 let L = console.log; // log to console
 
 const o = {}; // {name:{         // {String} data object name
@@ -19,25 +20,18 @@ const o = {}; // {name:{         // {String} data object name
               //     changed,    // {Boolean} was changed and will be saved soon
               //     loadError,  // {String}
               //     saveError   // {String}
-              //     initError   // {Boolean} never initialized (get or getRO was not called)
+              //     initError   // {Boolean} never initialized (get/set was not called)
               //  }, ...}
 let saving = {}; // {name:<boolean>, ...} // object of this name is in the saving process right now
 
 
-function get(name, defaultValue) {
-  name = '' + name
-  if (!o[name]) _load(name, defaultValue);
-  return _getWatchedObject(name)
-}
-
-
-function getRO(name, defaultValue) {
+async function get(name, opt) { // opt = {readonly}
   name = '' + name
   if (!o[name]) {
-    _load(name, defaultValue);
-    o[name].readonly = true;
+    await _load(name);
+    if (READONLY_TOTAL || (opt && opt.readonly)) o[name].readonly=true
   }
-  return deepFreeze(o[name].data);
+  return (READONLY_TOTAL || (opt && opt.readonly) ? deepFreeze(o[name].data) : _getWatchedObject(name))
 }
 
 
@@ -57,25 +51,26 @@ function getStatus(name) {
 }
 
 
-function set(name, data) {
+async function set(name, data, opt) { // opt = {readonly}
   name = '' + name
   o[name] = {
     data,
-    changed: true
+    changed: true,
+    ...(READONLY_TOTAL || (opt && opt.readonly) ? {readonly:true}:{})
   }
-  return _getWatchedObject(name)
+  return (READONLY_TOTAL || (opt && opt.readonly) ? deepFreeze(o[name].data) : _getWatchedObject(name))
 }
 
 
-async function init(opt) { // {
-                     //    logger,     // {Function}
-                     //    savePeriod, // {Integer}
-                     //    storage:{
-                     //      connect,  // {Function, reqiured}
-                     //      load,     // {Function, reqiured}
-                     //      save      // {Async Function, reqiured}
-                     //    }
-                     // }
+async function init(opt) { // opt = {
+                           //    logger,     // {Function}
+                           //    savePeriod, // {Integer}
+                           //    readonly,   // {Boolean} all data is readonly
+                           //    storage:{
+                           //      connect,  // {Async Function, reqiured}
+                           //      load,     // {Async Function, reqiured}
+                           //      save      // {Async Function, reqiured}
+                           // }
   if (opt && opt.savePeriod) {
     if (typeof opt.savePeriod !== 'number' || !Number.isInteger(opt.savePeriod)) {
       L('kv30.opt.savePeriod should be integer');
@@ -102,6 +97,11 @@ async function init(opt) { // {
     }
   }
 
+  if (opt && opt.readonly) {
+    L(`kv30 READONLY_TOTAL was updated [${!!opt.readonly}]`);
+    READONLY_TOTAL = !!opt.readonly
+  }
+
   if (opt && opt.logger) {
     if (typeof opt.logger !== 'function') {
       L('kv30.opt.logger is not a function');
@@ -111,9 +111,13 @@ async function init(opt) { // {
     }
   }
 
+  const connectOpt = {
+    ...(opt && opt.readonly ? {readonly:true} : {})
+  }
+
   try {
     let s = Date.now();
-    await STORAGE.connect();
+    await STORAGE.connect(connectOpt);
     setInterval(_saveChanged, SAVE_PERIOD*1000)
     L(`kv30 was initialized, ${Date.now()-s} ms`)
   } catch (e) {
@@ -132,25 +136,19 @@ function _saveChanged(){
 }
 
 
-function _load(name, defaultValue) {
+async function _load(name) {
   let data = {};
   let loadError;
   let changed = false;
 
   try {
     let s = Date.now();
-    data = STORAGE.load(name);
+    data = await STORAGE.load(name);
     L(`kv30 [data:${name}] loaded, ${Date.now()-s} ms`);
   } catch (e) {
-    if (defaultValue) {
-      data = defaultValue;
-      changed = true;
-      L(`kv30 [data:${name}] *NOT* loaded, got default value`);
-    } else {
-      data = {};
-      loadError = e;
-      L(`kv30 [data:${name}] *NOT* loaded`);
-    }
+    data = {};
+    loadError = e;
+    L(`kv30 [data:${name}] *NOT* loaded`);
     L(e);
   }
   o[name] = {
@@ -218,9 +216,8 @@ function _getWatchedObject(name) {
 
 
 module.exports = {
-  init,
-  get,
-  getRO,
+  init, // async
+  get,  // async 
+  set,  // async
   getStatus,
-  set,
 }

@@ -1,6 +1,6 @@
 {
   "name": "kv30",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A key/value storage with change watching",
   "author": "Artem Dudkin <sheeva@list.ru>",
   "license": "MIT",

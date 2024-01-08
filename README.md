@@ -12,10 +12,11 @@ npm i --save kv30
 
 ```js
 const kv30 = require('kv30');
-kv30.init();
+
+await kv30.init();
 
 // load json from ./data/settings.json
-const data = kv30.get('settings'); 
+const data = await kv30.get('settings'); 
 
 // use and change data
 data.newProp='123';
@@ -34,7 +35,7 @@ Technically it is **in-memory cache** with disk persistance, that watches data c
 
 ## Readonly case
 ```js
-const data = kv30.getRO('settings'); // returns deeply freezed object
+const data = await kv30.get('settings', {readonly:true}); // returns deeply freezed object
 ```
 
 ## Configuration
@@ -45,34 +46,33 @@ storageFile.setProps({
     dataFolder:'./', // change data folder
 });
 kv30.init({
-    savePeriod:10, // flush changes every 10 seconds 
-    logger:()=>{}  // no logs about load/save/errors
+    savePeriod: 10, // flush changes every 10 seconds 
+    logger: ()=>{}, // no logs about load/save/errors
+    readonly: true, // all data is readonly (cannot change and save)
 });
 
 ```
 
 ## Check data health
 ```js
-// can set default value 
-// (for that case when file is not available)
-let data = kv30.get('settings', {data:[]});
+let data = await kv30.get('settings');
 
-// or can handle data status
-//    readonly  - readonly data (getRO used)
+// handling data status
+//    readonly  - readonly data
 //    changed   - data was changed and it is not saved yet
 //    loadError - loading falied; will not save changes
 //    saveError - saving failed
-//    initError - not initialized (get/getRO/set was not called)
+//    initError - not initialized (get/set was not called)
 if (kv30.getStatus('settings').loadError) {
-    data = kv30.set('settings', {data:[]});
+    data = await kv30.set('settings', {data:[]}); // set default value
 }
 ```
 
 ## Custom storage
 
-You can use custom storage, that exports `connect`, `load` and async `save` methods (looks at `storage.file.js`)
+You can use custom storage, that exports `connect`, `load`, `save` methods (looks at `storage.file.js`)
 ```js
-kv30.init({storage: customStorage})
+await kv30.init({storage: customStorage})
 ```
 
 ## License
