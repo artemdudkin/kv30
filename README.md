@@ -2,6 +2,8 @@
 
 > A local key/value storage with change watching
 
+![tests](https://github.com/artemdudkin/kv30/actions/workflows/node.js.yml/badge.svg)
+
 ## Installation
 
 ```bash
