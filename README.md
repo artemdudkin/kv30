@@ -2,7 +2,7 @@
 
 > A local key/value storage with change watching
 
-![tests](https://github.com/artemdudkin/kv30/actions/workflows/node.js.yml/badge.svg)
+![tests](https://github.com/artemdudkin/kv30/actions/workflows/node.js.yml/badge.svg) [![codecov](https://codecov.io/gh/artemdudkin/kv30/graph/badge.svg?token=CKD0CA3VU7)](https://codecov.io/gh/artemdudkin/kv30)
 
 ## Installation
 
