@@ -1,12 +1,15 @@
 {
   "name": "kv30",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A key/value storage with change watching",
   "author": "Artem Dudkin <sheeva@list.ru>",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/artemdudkin/kv30"
+  },
+  "scripts":{
+    "test": "jest"
   },
   "keywords": [
     "json cache",
@@ -15,6 +18,7 @@
     "key value",
     "cache"
   ],
-  "dependencies": {
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
