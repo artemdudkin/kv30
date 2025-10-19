@@ -6,7 +6,8 @@
 
 ## Motivation for this module
 
-I needed simple and dependence-free data storage for my prof-of-concept projects, that can be replaced with DB or something later. (Also I don't mind if I lose data of the last few seconds).
+I needed simple and dependence-free data storage for my prof-of-concept projects, that can be replaced with DB or something later. 
+(Also I don't mind if I lose data of the last few seconds).
 
 Technically it is **in-memory cache** with disk persistance, that watches data change and flushes it to disk.
 
@@ -31,8 +32,9 @@ const data = await kv30.get('settings');
 data.newProp='123';
 
 //...
-// kv30 will automatically save changes of data
+// kv30 will automatically save data
 // in next 30 seconds to ./data/settings.json
+// if changes took place
 // ...
 ```
 
