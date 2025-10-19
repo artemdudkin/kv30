@@ -4,6 +4,13 @@
 
 ![tests](https://github.com/artemdudkin/kv30/actions/workflows/node.js.yml/badge.svg) [![codecov](https://codecov.io/gh/artemdudkin/kv30/graph/badge.svg?token=CKD0CA3VU7)](https://codecov.io/gh/artemdudkin/kv30)
 
+## Motivation for this module
+
+I needed simple and dependence-free data storage for my prof-of-concept projects, that can be replaced with DB or something later. (Also I don't mind if I lose data of the last few seconds).
+
+Technically it is **in-memory cache** with disk persistance, that watches data change and flushes it to disk.
+
+
 ## Installation
 
 ```bash
@@ -24,16 +31,10 @@ const data = await kv30.get('settings');
 data.newProp='123';
 
 //...
-// kv30 will automatically save changes 
+// kv30 will automatically save changes of data
 // in next 30 seconds to ./data/settings.json
 // ...
 ```
-
-## Motivation for this module
-
-I needed simple and dependence-free data storage for my prof-of-concept projects, that can be replaced with DB or something later. Also I don't mind if I loose data for the last 30 secons.
-
-Technically it is **in-memory cache** with disk persistance, that watches data change and flushes it to disk.
 
 ## Readonly case
 ```js
